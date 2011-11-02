@@ -30,6 +30,8 @@ public class ConfigFile {
     public static String dbUserName = "";
     public static String dbPassword = "";
     
+    public String lastError = "";
+    
     public boolean  loadConfig() {
         Properties configFile = new Properties();
         boolean loaded = false;
@@ -41,7 +43,7 @@ public class ConfigFile {
             dbUserName = configFile.getProperty("db_username", "root");
             dbPassword = configFile.getProperty("db_password", "");
             loaded = true;
-        } catch (IOException ex) { System.out.println(ex.getMessage()); }
+        } catch (IOException ex) { lastError = ex.getMessage(); }
         
         return loaded;
     }

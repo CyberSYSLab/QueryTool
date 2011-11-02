@@ -33,6 +33,8 @@ public class SQLDocument extends DefaultStyledDocument {
     private MutableAttributeSet comment;
     private MutableAttributeSet quote;
     private HashMap<String, Object> keywords;
+    
+    private String lastError = "";
 
     public SQLDocument() {
 
@@ -69,7 +71,9 @@ public class SQLDocument extends DefaultStyledDocument {
         keywords.put("JOIN", dummyObject);
         keywords.put("UNION", dummyObject);
         keywords.put("INSERT", dummyObject);
+        keywords.put("UPDATE", dummyObject);
         keywords.put("INTO", dummyObject);
+        keywords.put("SET", dummyObject);
         keywords.put("DROP", dummyObject);
         keywords.put("EXISTS", dummyObject);
         keywords.put("LIMIT", dummyObject);
@@ -276,7 +280,7 @@ public class SQLDocument extends DefaultStyledDocument {
         super.fireInsertUpdate(evt);
         try {
             processChangedLines(evt.getOffset(), evt.getLength());
-        } catch (BadLocationException ex) { System.out.println("" + ex); }
+        } catch (BadLocationException ex) { lastError = ex.getMessage(); }
     }
 
     /**
@@ -287,7 +291,7 @@ public class SQLDocument extends DefaultStyledDocument {
         super.fireRemoveUpdate(evt);
         try {
             processChangedLines(evt.getOffset(), evt.getLength());
-        } catch (BadLocationException ex) { System.out.println("" + ex); }
+        } catch (BadLocationException ex) { lastError = ex.getMessage(); }
     }
 
     /**

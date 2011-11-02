@@ -130,7 +130,7 @@ public class MySQLAdapter {
         try {
             if (isConnected()) {
                 PreparedStatement ps = connection.prepareStatement(query);
-                result = ps.executeQuery();
+                if (ps.execute()) result = ps.getResultSet();
             }
         } catch (SQLException ex) { queryMessage = ex.getMessage(); }
 
@@ -174,5 +174,12 @@ public class MySQLAdapter {
         connectionInfo = userName;
         
         return userName;
+    }
+    
+    public void switchDB(String dbName) {
+        if (isConnected() && dbName != null && !dbName.isEmpty()) {
+            exec("use "+ dbName);
+            getCurrentDatabase();
+        }
     }
 }

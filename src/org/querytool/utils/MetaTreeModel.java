@@ -22,19 +22,25 @@ package org.querytool.utils;
 import java.util.ArrayList;
 import java.util.TreeMap;
 import javax.swing.event.EventListenerList;
-import javax.swing.event.TreeModelListener;
 import javax.swing.tree.DefaultMutableTreeNode;
 import javax.swing.tree.DefaultTreeModel;
-import javax.swing.tree.TreeModel;
-import javax.swing.tree.TreePath;
+import javax.swing.tree.TreeNode;
 
-public class MetaTreeModel implements TreeModel {
+public class MetaTreeModel extends DefaultTreeModel {
+
+    public MetaTreeModel(TreeNode root, boolean asksAllowsChildren) { super(root, asksAllowsChildren); }
+
+    public MetaTreeModel(TreeNode root) { super(root); }
     
+    public MetaTreeModel() {
+        super(null);
+        super.root = rootNode;
+    }
+
     protected EventListenerList listeners = new EventListenerList();
     
     private DefaultMutableTreeNode rootNode = new DefaultMutableTreeNode("Databases");
-    private DefaultTreeModel innerModel = new DefaultTreeModel(rootNode);
-    
+        
     public void loadMeta(TreeMap<String, ArrayList> map) {
         rootNode.removeAllChildren();
         for (String key : map.keySet()) {
@@ -47,28 +53,8 @@ public class MetaTreeModel implements TreeModel {
             rootNode.add(dbNode);
         }
     }
-
+    
     @Override
     public Object getRoot() { return rootNode; }
 
-    @Override
-    public boolean isLeaf(Object node) { return innerModel.isLeaf(node); }
-
-    @Override
-    public int getChildCount(Object parent) { return innerModel.getChildCount(parent); }
-
-    @Override
-    public Object getChild(Object parent, int index) { return innerModel.getChild(parent, index); }
-
-    @Override
-    public int getIndexOfChild(Object parent, Object child) { return innerModel.getIndexOfChild(parent, child); }
-
-    @Override
-    public void valueForPathChanged(TreePath path, Object value) { }
-
-    @Override
-    public void addTreeModelListener(TreeModelListener l) { innerModel.addTreeModelListener(l); }
-
-    @Override
-    public void removeTreeModelListener(TreeModelListener l) { innerModel.removeTreeModelListener(l); }
 }

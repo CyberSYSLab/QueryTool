@@ -32,6 +32,8 @@ import javax.swing.AbstractAction;
 import javax.swing.BorderFactory;
 import javax.swing.KeyStroke;
 import javax.swing.SwingUtilities;
+import javax.swing.text.Position;
+import javax.swing.tree.TreePath;
 import org.querytool.utils.*;
 
 public class MFrame extends javax.swing.JFrame {
@@ -59,11 +61,13 @@ public class MFrame extends javax.swing.JFrame {
     
     private QueryTableModel queryTableModel = new QueryTableModel();
     private MetaTreeModel metaTreeModel = new MetaTreeModel();
+    private MetaTreeCellRenderer metaCellRenderer = new MetaTreeCellRenderer();
 
     public MFrame() {
         initComponents();
         
         queryResultTable.setModel(queryTableModel);
+        metaTree.setCellRenderer(metaCellRenderer);
         
         URL url = ClassLoader.getSystemResource("resources/querytool_128.png");
         Toolkit kit = Toolkit.getDefaultToolkit();
@@ -91,7 +95,6 @@ public class MFrame extends javax.swing.JFrame {
         hotkeyManager.getActionMap().put(SHOWHELP_KEY, showHelpAction);
 
         setSyntax();
-        queryCode.requestFocus();
 
         connectionTimerTask = new CheckConnectionTask();
         appTimer.schedule(connectionTimerTask, new Date(), 1000);
@@ -119,10 +122,30 @@ public class MFrame extends javax.swing.JFrame {
                     
                     queryCode.setEnabled(connected);
                     queryResultTable.setEnabled(connected);
-                    dbMetaTree.setEnabled(connected);
+                    metaTree.setEnabled(connected);
                     
-                    taActiveDB.setText("DB: "+ activeDB);
-                    taActiveDB.setCaretPosition(0);
+                    if (!taActiveDB.getText().equalsIgnoreCase("DB: "+ activeDB)) {
+                        taActiveDB.setText("DB: "+ activeDB);
+                        taActiveDB.setCaretPosition(0);
+                        TreePath dbPath = null;
+                        TreePath tp = metaTree.getNextMatch(activeDB, 0, Position.Bias.Forward);
+                        while (tp != null) {
+                            if (tp.getLastPathComponent().toString().equalsIgnoreCase(activeDB)) {
+                                dbPath = tp;
+                                tp = null;
+                            } else {
+                                tp = metaTree.getNextMatch(activeDB, metaTree.getRowForPath(tp) +1, Position.Bias.Forward);
+                            }
+                        }
+                        if (dbPath != null) {
+                            metaCellRenderer.setHighLightName(activeDB);
+                            for (int i = metaTree.getRowCount() -1; i >= 0; i--) metaTree.collapseRow(i);
+                            metaTree.setSelectionPath(dbPath);
+                            metaTree.expandPath(dbPath);
+                            metaTree.scrollPathToVisible(dbPath);
+                        }
+                    }
+
                     taMessage.setText(conMsg);
                     taMessage.setCaretPosition(0);
                     setTitle("QueryTool ["+ conInfo +"]");
@@ -133,7 +156,10 @@ public class MFrame extends javax.swing.JFrame {
     
     private void loadDBMeta() {
         metaTreeModel.loadMeta(MySQLAdapter.getInstance().getMetaData());
-        dbMetaTree.setModel(metaTreeModel);
+        metaTree.setModel(metaTreeModel);
+        metaTree.setRootVisible(true);
+        metaTree.expandRow(0);
+        metaTree.setRootVisible(false);
     }
 
     private final AbstractAction openConnAction = new AbstractAction() {
@@ -145,6 +171,7 @@ public class MFrame extends javax.swing.JFrame {
                 dialog.setLocationRelativeTo(null);
                 dialog.setVisible(true);
                 loadDBMeta();
+                queryCode.grabFocus();
 
             } catch (Exception exc) { System.err.println(exc.getLocalizedMessage()); }
             setEnabled(true);
@@ -177,7 +204,7 @@ public class MFrame extends javax.swing.JFrame {
 
     private final AbstractAction selMetaAction = new AbstractAction() {
         @Override
-        public void actionPerformed(ActionEvent e) { if (dbMetaTree.isFocusable()) { dbMetaTree.requestFocus(); }; }
+        public void actionPerformed(ActionEvent e) { if (metaTree.isFocusable()) { metaTree.requestFocus(); }; }
     };
 
     private final AbstractAction execQueryAction = new AbstractAction() {
@@ -215,7 +242,7 @@ public class MFrame extends javax.swing.JFrame {
         spActiveDB = new javax.swing.JScrollPane();
         taActiveDB = new javax.swing.JTextArea();
         spMetaTree = new javax.swing.JScrollPane();
-        dbMetaTree = new javax.swing.JTree();
+        metaTree = new javax.swing.JTree();
         spResultTable = new javax.swing.JScrollPane();
         queryResultTable = new javax.swing.JTable();
         spQueryCode = new javax.swing.JScrollPane();
@@ -244,6 +271,7 @@ public class MFrame extends javax.swing.JFrame {
         taActiveDB.setText("Not connected...");
         taActiveDB.setAutoscrolls(false);
         taActiveDB.setBorder(javax.swing.BorderFactory.createEmptyBorder(0, 3, 0, 0));
+        taActiveDB.setFocusable(false);
         spActiveDB.setViewportView(taActiveDB);
 
         javax.swing.GroupLayout paneActiveDBLayout = new javax.swing.GroupLayout(paneActiveDB);
@@ -260,16 +288,21 @@ public class MFrame extends javax.swing.JFrame {
         spMetaTree.setBorder(javax.swing.BorderFactory.createLineBorder(new java.awt.Color(204, 204, 204), 2));
         spMetaTree.setForeground(new java.awt.Color(204, 204, 204));
 
-        dbMetaTree.setModel(new org.querytool.utils.MetaTreeModel());
-        dbMetaTree.addFocusListener(new java.awt.event.FocusAdapter() {
+        metaTree.setModel(new org.querytool.utils.MetaTreeModel());
+        metaTree.addFocusListener(new java.awt.event.FocusAdapter() {
             public void focusGained(java.awt.event.FocusEvent evt) {
-                dbMetaTreeFocusGained(evt);
+                metaTreeFocusGained(evt);
             }
             public void focusLost(java.awt.event.FocusEvent evt) {
-                dbMetaTreeFocusLost(evt);
+                metaTreeFocusLost(evt);
             }
         });
-        spMetaTree.setViewportView(dbMetaTree);
+        metaTree.addKeyListener(new java.awt.event.KeyAdapter() {
+            public void keyPressed(java.awt.event.KeyEvent evt) {
+                metaTreeKeyPressed(evt);
+            }
+        });
+        spMetaTree.setViewportView(metaTree);
 
         spResultTable.setBorder(javax.swing.BorderFactory.createLineBorder(new java.awt.Color(204, 204, 204), 2));
         spResultTable.setForeground(new java.awt.Color(204, 204, 204));
@@ -319,6 +352,7 @@ public class MFrame extends javax.swing.JFrame {
         taMessage.setText("No message...");
         taMessage.setAutoscrolls(false);
         taMessage.setBorder(javax.swing.BorderFactory.createEmptyBorder(0, 3, 0, 0));
+        taMessage.setFocusable(false);
         spMessage.setViewportView(taMessage);
 
         javax.swing.GroupLayout paneMessageLayout = new javax.swing.GroupLayout(paneMessage);
@@ -371,13 +405,13 @@ public class MFrame extends javax.swing.JFrame {
         spQueryCode.setBorder(BorderFactory.createLineBorder(noFocusColor, 2));
     }//GEN-LAST:event_queryCodeFocusLost
 
-    private void dbMetaTreeFocusGained(java.awt.event.FocusEvent evt) {//GEN-FIRST:event_dbMetaTreeFocusGained
+    private void metaTreeFocusGained(java.awt.event.FocusEvent evt) {//GEN-FIRST:event_metaTreeFocusGained
         spMetaTree.setBorder(BorderFactory.createLineBorder(focusColor, 2));
-    }//GEN-LAST:event_dbMetaTreeFocusGained
+    }//GEN-LAST:event_metaTreeFocusGained
 
-    private void dbMetaTreeFocusLost(java.awt.event.FocusEvent evt) {//GEN-FIRST:event_dbMetaTreeFocusLost
+    private void metaTreeFocusLost(java.awt.event.FocusEvent evt) {//GEN-FIRST:event_metaTreeFocusLost
         spMetaTree.setBorder(BorderFactory.createLineBorder(noFocusColor, 2));
-    }//GEN-LAST:event_dbMetaTreeFocusLost
+    }//GEN-LAST:event_metaTreeFocusLost
 
     private void queryResultTableFocusGained(java.awt.event.FocusEvent evt) {//GEN-FIRST:event_queryResultTableFocusGained
         spResultTable.setBorder(BorderFactory.createLineBorder(focusColor, 2));
@@ -387,8 +421,19 @@ public class MFrame extends javax.swing.JFrame {
         spResultTable.setBorder(BorderFactory.createLineBorder(noFocusColor, 2));
     }//GEN-LAST:event_queryResultTableFocusLost
 
+    private void metaTreeKeyPressed(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_metaTreeKeyPressed
+        if (evt.getKeyCode() == KeyEvent.VK_ENTER) {
+            TreePath tp = metaTree.getSelectionPath();
+            if (tp.getPath().length == 2) {
+                String name = tp.getLastPathComponent().toString();
+                MySQLAdapter.getInstance().switchDB(name);
+                metaTree.repaint();
+            }
+        }
+    }//GEN-LAST:event_metaTreeKeyPressed
+
     // Variables declaration - do not modify//GEN-BEGIN:variables
-    private javax.swing.JTree dbMetaTree;
+    private javax.swing.JTree metaTree;
     private javax.swing.JPanel paneActiveDB;
     private javax.swing.JPanel paneMessage;
     private javax.swing.JTextPane queryCode;

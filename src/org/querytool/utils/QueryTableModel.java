@@ -20,6 +20,7 @@
 package org.querytool.utils;
 
 import java.sql.ResultSet;
+import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import javax.swing.event.TableModelEvent;
@@ -30,6 +31,7 @@ public class QueryTableModel extends AbstractTableModel implements TableModelLis
 
     private ArrayList<String> columnFields = new ArrayList<String>();
     private Object[][] data = null;
+    private ArrayList<String> columnTypes = new ArrayList<String>();
 
     private String lastError = "";
     
@@ -40,16 +42,19 @@ public class QueryTableModel extends AbstractTableModel implements TableModelLis
     public void loadData(ResultSet resultSet) {
         data = null;
         columnFields.clear();
+        columnTypes.clear();
         try {
             if (resultSet != null && !resultSet.isClosed() && resultSet.next()) {
                 ArrayList rowData = new ArrayList();
                 ArrayList queryData = new ArrayList();
+                ResultSetMetaData meta = resultSet.getMetaData();
                 resultSet.beforeFirst();
-                for (int i = 1; i <= resultSet.getMetaData().getColumnCount(); i++) {
-                    columnFields.add(resultSet.getMetaData().getColumnName(i));
+                for (int i = 1; i <= meta.getColumnCount(); i++) {
+                    columnFields.add(meta.getColumnName(i));
+                    columnTypes.add(meta.getColumnClassName(i));
                 }
                 while (resultSet.next()) {
-                    for (int i = 1; i <= resultSet.getMetaData().getColumnCount(); i++) {
+                    for (int i = 1; i <= meta.getColumnCount(); i++) {
                         rowData.add(resultSet.getObject(i));
                     }
                     queryData.add(rowData.toArray());
@@ -73,7 +78,17 @@ public class QueryTableModel extends AbstractTableModel implements TableModelLis
     public Object getValueAt(int rowIndex, int columnIndex) { if (data != null) return data[rowIndex][columnIndex]; else return null; }
 
     @Override
-    public Class<?> getColumnClass(int columnIndex) { if (data != null && data.length > 0 && data[0][columnIndex] != null) return data[0][columnIndex].getClass(); else return "".getClass(); }
+    public Class<?> getColumnClass(int columnIndex) {
+        Class type = "".getClass();
+        if (data != null && data.length > 0) {
+            try {
+                type = Class.forName(columnTypes.get(columnIndex));
+            } catch (ClassNotFoundException ex) { lastError = ex.getMessage();
+            } finally { return type; }
+        }
+        
+        return type;
+    }
 
     @Override
     public String getColumnName(int column) { return columnFields.get(column); }
