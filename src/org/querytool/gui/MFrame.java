@@ -25,9 +25,7 @@ import java.awt.Toolkit;
 import java.awt.event.ActionEvent;
 import java.awt.event.KeyEvent;
 import java.net.URL;
-import java.util.Date;
-import java.util.Timer;
-import java.util.TimerTask;
+import java.util.*;
 import javax.swing.AbstractAction;
 import javax.swing.BorderFactory;
 import javax.swing.KeyStroke;
@@ -55,18 +53,24 @@ public class MFrame extends javax.swing.JFrame {
     private final String SHOWHELP_KEY = "SHOWHELP";
     private final KeyStroke showHelpHotkey = KeyStroke.getKeyStroke(KeyEvent.VK_F1, 0, false);
     
-    private final Color focusColor = Color.decode("#AADDAA");
+    private final Color focusColor = Color.decode("#AAAAEE");
     private final Color noFocusColor = Color.LIGHT_GRAY;
     
     private QueryTableModel queryTableModel = new QueryTableModel();
     private MetaTreeModel metaTreeModel = new MetaTreeModel();
     private MetaTreeCellRenderer metaCellRenderer = new MetaTreeCellRenderer();
+    private SQLDocumentListener sqlDocumentListener = new SQLDocumentListener();
+    private SQLDocument sqlDocument = new SQLDocument();
+    private List<String> keyWords = new ArrayList<String>();
 
     public MFrame() {
         initComponents();
         
         queryResultTable.setModel(queryTableModel);
         metaTree.setCellRenderer(metaCellRenderer);
+
+        sqlDocumentListener.setTextArea(queryCode, sqlDocument);
+        sqlDocument.addDocumentListener(sqlDocumentListener);
         
         URL url = ClassLoader.getSystemResource("resources/querytool_128.png");
         Toolkit kit = Toolkit.getDefaultToolkit();
@@ -93,15 +97,35 @@ public class MFrame extends javax.swing.JFrame {
         hotkeyManager.getInputMap().put(showHelpHotkey, SHOWHELP_KEY);
         hotkeyManager.getActionMap().put(SHOWHELP_KEY, showHelpAction);
 
-        setSyntax();
         hideTreeRoot();
-
+        keyWords.add("USE");
+        keyWords.add("SELECT");
+        keyWords.add("FROM");
+        keyWords.add("WHERE");
+        keyWords.add("AND");
+        keyWords.add("OR");
+        keyWords.add("AS");
+        keyWords.add("IN");
+        keyWords.add("LIKE");
+        keyWords.add("BETWEEN");
+        keyWords.add("ORDER");
+        keyWords.add("GROUP");
+        keyWords.add("BY");
+        keyWords.add("JOIN");
+        keyWords.add("UNION");
+        keyWords.add("INSERT");
+        keyWords.add("UPDATE");
+        keyWords.add("INTO");
+        keyWords.add("SET");
+        keyWords.add("DROP");
+        keyWords.add("EXISTS");
+        keyWords.add("LIMIT");
+        keyWords.add("TABLE");
+        sqlDocument.loadKeyWords(keyWords);
+        sqlDocumentListener.loadKeyWords(keyWords);
+        
         connectionTimerTask = new CheckConnectionTask();
         appTimer.schedule(connectionTimerTask, new Date(), 1000);
-    }
-
-    private void setSyntax() {
-        queryCode.setDocument(new SQLDocument());
     }
     
     class CheckConnectionTask extends TimerTask {
@@ -248,52 +272,19 @@ public class MFrame extends javax.swing.JFrame {
     // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
     private void initComponents() {
 
-        paneActiveDB = new javax.swing.JPanel();
-        spActiveDB = new javax.swing.JScrollPane();
-        taActiveDB = new javax.swing.JTextArea();
         spMetaTree = new javax.swing.JScrollPane();
         metaTree = new javax.swing.JTree();
         spResultTable = new javax.swing.JScrollPane();
         queryResultTable = new javax.swing.JTable();
-        spQueryCode = new javax.swing.JScrollPane();
-        queryCode = new javax.swing.JTextPane();
-        paneMessage = new javax.swing.JPanel();
         spMessage = new javax.swing.JScrollPane();
         taMessage = new javax.swing.JTextArea();
+        spActiveDB = new javax.swing.JScrollPane();
+        taActiveDB = new javax.swing.JTextArea();
+        spQueryCode = new javax.swing.JScrollPane();
+        queryCode = new javax.swing.JTextPane();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
         setTitle("QueryTool");
-
-        paneActiveDB.setBorder(javax.swing.BorderFactory.createLineBorder(new java.awt.Color(204, 204, 204)));
-        paneActiveDB.setForeground(new java.awt.Color(204, 204, 204));
-
-        spActiveDB.setBorder(null);
-        spActiveDB.setHorizontalScrollBarPolicy(javax.swing.ScrollPaneConstants.HORIZONTAL_SCROLLBAR_NEVER);
-        spActiveDB.setVerticalScrollBarPolicy(javax.swing.ScrollPaneConstants.VERTICAL_SCROLLBAR_NEVER);
-        spActiveDB.setHorizontalScrollBar(null);
-
-        taActiveDB.setBackground(javax.swing.UIManager.getDefaults().getColor("Label.background"));
-        taActiveDB.setColumns(20);
-        taActiveDB.setEditable(false);
-        taActiveDB.setForeground(new java.awt.Color(153, 153, 153));
-        taActiveDB.setRows(5);
-        taActiveDB.setTabSize(4);
-        taActiveDB.setText("Not connected...");
-        taActiveDB.setAutoscrolls(false);
-        taActiveDB.setBorder(javax.swing.BorderFactory.createEmptyBorder(0, 3, 0, 0));
-        taActiveDB.setFocusable(false);
-        spActiveDB.setViewportView(taActiveDB);
-
-        javax.swing.GroupLayout paneActiveDBLayout = new javax.swing.GroupLayout(paneActiveDB);
-        paneActiveDB.setLayout(paneActiveDBLayout);
-        paneActiveDBLayout.setHorizontalGroup(
-            paneActiveDBLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addComponent(spActiveDB, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.PREFERRED_SIZE, 0, Short.MAX_VALUE)
-        );
-        paneActiveDBLayout.setVerticalGroup(
-            paneActiveDBLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addComponent(spActiveDB, javax.swing.GroupLayout.PREFERRED_SIZE, 0, Short.MAX_VALUE)
-        );
 
         spMetaTree.setBorder(javax.swing.BorderFactory.createLineBorder(new java.awt.Color(204, 204, 204), 2));
         spMetaTree.setForeground(new java.awt.Color(204, 204, 204));
@@ -336,21 +327,7 @@ public class MFrame extends javax.swing.JFrame {
         });
         spResultTable.setViewportView(queryResultTable);
 
-        spQueryCode.setBorder(javax.swing.BorderFactory.createLineBorder(new java.awt.Color(204, 204, 204), 2));
-
-        queryCode.addFocusListener(new java.awt.event.FocusAdapter() {
-            public void focusGained(java.awt.event.FocusEvent evt) {
-                queryCodeFocusGained(evt);
-            }
-            public void focusLost(java.awt.event.FocusEvent evt) {
-                queryCodeFocusLost(evt);
-            }
-        });
-        spQueryCode.setViewportView(queryCode);
-
-        paneMessage.setBorder(javax.swing.BorderFactory.createLineBorder(new java.awt.Color(204, 204, 204)));
-
-        spMessage.setBorder(null);
+        spMessage.setBorder(javax.swing.BorderFactory.createLineBorder(new java.awt.Color(204, 204, 204)));
         spMessage.setHorizontalScrollBarPolicy(javax.swing.ScrollPaneConstants.HORIZONTAL_SCROLLBAR_NEVER);
         spMessage.setVerticalScrollBarPolicy(javax.swing.ScrollPaneConstants.VERTICAL_SCROLLBAR_NEVER);
 
@@ -361,47 +338,67 @@ public class MFrame extends javax.swing.JFrame {
         taMessage.setRows(5);
         taMessage.setText("No message...");
         taMessage.setAutoscrolls(false);
-        taMessage.setBorder(javax.swing.BorderFactory.createEmptyBorder(0, 3, 0, 0));
+        taMessage.setBorder(javax.swing.BorderFactory.createEmptyBorder(1, 3, 1, 1));
         taMessage.setFocusable(false);
         spMessage.setViewportView(taMessage);
 
-        javax.swing.GroupLayout paneMessageLayout = new javax.swing.GroupLayout(paneMessage);
-        paneMessage.setLayout(paneMessageLayout);
-        paneMessageLayout.setHorizontalGroup(
-            paneMessageLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addComponent(spMessage, javax.swing.GroupLayout.Alignment.TRAILING)
-        );
-        paneMessageLayout.setVerticalGroup(
-            paneMessageLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addComponent(spMessage, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, 15, Short.MAX_VALUE)
-        );
+        spActiveDB.setBorder(javax.swing.BorderFactory.createLineBorder(new java.awt.Color(204, 204, 204)));
+        spActiveDB.setHorizontalScrollBarPolicy(javax.swing.ScrollPaneConstants.HORIZONTAL_SCROLLBAR_NEVER);
+        spActiveDB.setVerticalScrollBarPolicy(javax.swing.ScrollPaneConstants.VERTICAL_SCROLLBAR_NEVER);
+        spActiveDB.setHorizontalScrollBar(null);
+
+        taActiveDB.setBackground(javax.swing.UIManager.getDefaults().getColor("Label.background"));
+        taActiveDB.setColumns(20);
+        taActiveDB.setEditable(false);
+        taActiveDB.setForeground(new java.awt.Color(153, 153, 153));
+        taActiveDB.setRows(5);
+        taActiveDB.setTabSize(4);
+        taActiveDB.setText("Not connected...");
+        taActiveDB.setAutoscrolls(false);
+        taActiveDB.setBorder(javax.swing.BorderFactory.createEmptyBorder(0, 3, 0, 0));
+        taActiveDB.setFocusable(false);
+        spActiveDB.setViewportView(taActiveDB);
+
+        spQueryCode.setBorder(javax.swing.BorderFactory.createLineBorder(new java.awt.Color(204, 204, 204), 2));
+
+        queryCode.setBorder(javax.swing.BorderFactory.createEmptyBorder(3, 6, 2, 2));
+        queryCode.setDocument(sqlDocument);
+        queryCode.addFocusListener(new java.awt.event.FocusAdapter() {
+            public void focusGained(java.awt.event.FocusEvent evt) {
+                queryCodeFocusGained(evt);
+            }
+            public void focusLost(java.awt.event.FocusEvent evt) {
+                queryCodeFocusLost(evt);
+            }
+        });
+        spQueryCode.setViewportView(queryCode);
 
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
         getContentPane().setLayout(layout);
         layout.setHorizontalGroup(
-            layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(layout.createSequentialGroup()
-                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
-                    .addComponent(spMetaTree, javax.swing.GroupLayout.DEFAULT_SIZE, 183, Short.MAX_VALUE)
-                    .addComponent(paneActiveDB, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+            layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
+            .addGroup(javax.swing.GroupLayout.Alignment.LEADING, layout.createSequentialGroup()
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING, false)
+                    .addComponent(spActiveDB, javax.swing.GroupLayout.PREFERRED_SIZE, 0, Short.MAX_VALUE)
+                    .addComponent(spMetaTree, javax.swing.GroupLayout.DEFAULT_SIZE, 183, Short.MAX_VALUE))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addComponent(spResultTable, javax.swing.GroupLayout.DEFAULT_SIZE, 628, Short.MAX_VALUE)
-                    .addComponent(paneMessage, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)))
-            .addComponent(spQueryCode)
+                    .addComponent(spMessage)))
+            .addComponent(spQueryCode, javax.swing.GroupLayout.Alignment.LEADING)
         );
         layout.setVerticalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(layout.createSequentialGroup()
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(spResultTable, javax.swing.GroupLayout.PREFERRED_SIZE, 0, Short.MAX_VALUE)
-                    .addComponent(spMetaTree, javax.swing.GroupLayout.DEFAULT_SIZE, 381, Short.MAX_VALUE))
+                    .addComponent(spMetaTree, javax.swing.GroupLayout.DEFAULT_SIZE, 401, Short.MAX_VALUE)
+                    .addComponent(spResultTable, javax.swing.GroupLayout.PREFERRED_SIZE, 0, Short.MAX_VALUE))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
-                    .addComponent(paneMessage, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                    .addComponent(paneActiveDB, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
+                    .addComponent(spMessage, javax.swing.GroupLayout.PREFERRED_SIZE, 17, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(spActiveDB, javax.swing.GroupLayout.PREFERRED_SIZE, 17, javax.swing.GroupLayout.PREFERRED_SIZE))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(spQueryCode, javax.swing.GroupLayout.PREFERRED_SIZE, 59, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addComponent(spQueryCode, javax.swing.GroupLayout.PREFERRED_SIZE, 69, javax.swing.GroupLayout.PREFERRED_SIZE))
         );
 
         pack();
@@ -443,8 +440,6 @@ public class MFrame extends javax.swing.JFrame {
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JTree metaTree;
-    private javax.swing.JPanel paneActiveDB;
-    private javax.swing.JPanel paneMessage;
     private javax.swing.JTextPane queryCode;
     private javax.swing.JTable queryResultTable;
     private javax.swing.JScrollPane spActiveDB;

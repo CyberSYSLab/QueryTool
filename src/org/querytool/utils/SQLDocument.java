@@ -21,6 +21,7 @@ package org.querytool.utils;
 
 import java.awt.Color;
 import java.util.HashMap;
+import java.util.List;
 import javax.swing.event.DocumentEvent;
 import javax.swing.text.*;
 
@@ -32,52 +33,27 @@ public class SQLDocument extends DefaultStyledDocument {
     private MutableAttributeSet keyword;
     private MutableAttributeSet comment;
     private MutableAttributeSet quote;
-    private HashMap<String, Object> keywords;
+    private HashMap<String, Object> keyWords = new HashMap<String, Object>();
     
     private String lastError = "";
 
     public SQLDocument() {
-
+        
         rootElement = getDefaultRootElement();
         putProperty(DefaultEditorKit.EndOfLineStringProperty, "\n");
-        normal = new SimpleAttributeSet();
 
+        normal = new SimpleAttributeSet();
         StyleConstants.setForeground(normal, Color.BLACK);
         comment = new SimpleAttributeSet();
-
         StyleConstants.setForeground(comment, Color.GRAY);
         keyword = new SimpleAttributeSet();
-
         StyleConstants.setForeground(keyword, Color.BLUE);
         quote = new SimpleAttributeSet();
-
         StyleConstants.setForeground(quote, Color.RED);
-        Object dummyObject = new Object();
-
-        keywords = new HashMap<String, Object>();
-        keywords.put("USE", dummyObject);
-        keywords.put("SELECT", dummyObject);
-        keywords.put("FROM", dummyObject);
-        keywords.put("WHERE", dummyObject);
-        keywords.put("AND", dummyObject);
-        keywords.put("OR", dummyObject);
-        keywords.put("AS", dummyObject);
-        keywords.put("IN", dummyObject);
-        keywords.put("LIKE", dummyObject);
-        keywords.put("BETWEEN", dummyObject);
-        keywords.put("ORDER", dummyObject);
-        keywords.put("GROUP", dummyObject);
-        keywords.put("BY", dummyObject);
-        keywords.put("JOIN", dummyObject);
-        keywords.put("UNION", dummyObject);
-        keywords.put("INSERT", dummyObject);
-        keywords.put("UPDATE", dummyObject);
-        keywords.put("INTO", dummyObject);
-        keywords.put("SET", dummyObject);
-        keywords.put("DROP", dummyObject);
-        keywords.put("EXISTS", dummyObject);
-        keywords.put("LIMIT", dummyObject);
-        keywords.put("TABLE", dummyObject);
+    }
+    
+    public void loadKeyWords(List<String> keyWords) {
+        for (String word : keyWords) this.keyWords.put(word, new Object());
     }
 
     /**
@@ -358,7 +334,7 @@ public class SQLDocument extends DefaultStyledDocument {
      * Override for other languages
      */
     protected boolean isKeyword(String token) {
-        Object o = keywords.get(token.toUpperCase());
+        Object o = keyWords.get(token.toUpperCase());
         return o == null ? false : true;
     }
 
