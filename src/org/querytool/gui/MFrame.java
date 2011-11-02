@@ -31,7 +31,6 @@ import java.util.TimerTask;
 import javax.swing.AbstractAction;
 import javax.swing.BorderFactory;
 import javax.swing.KeyStroke;
-import javax.swing.SwingUtilities;
 import javax.swing.text.Position;
 import javax.swing.tree.TreePath;
 import org.querytool.utils.*;
@@ -95,6 +94,7 @@ public class MFrame extends javax.swing.JFrame {
         hotkeyManager.getActionMap().put(SHOWHELP_KEY, showHelpAction);
 
         setSyntax();
+        hideTreeRoot();
 
         connectionTimerTask = new CheckConnectionTask();
         appTimer.schedule(connectionTimerTask, new Date(), 1000);
@@ -106,60 +106,63 @@ public class MFrame extends javax.swing.JFrame {
     
     class CheckConnectionTask extends TimerTask {
         @Override public void run() {
-            SwingUtilities.invokeLater(new Runnable(){
-                @Override
-                public void run() {
-                    String activeDB = "No DB selected";
-                    String conInfo = "Not connected";
-                    String conMsg = "No message";
-                    boolean connected = MySQLAdapter.getInstance().isConnected();
-                    
-                    if (connected) {
-                        activeDB = MySQLAdapter.getInstance().getActiveDatabase();
-                        conInfo = MySQLAdapter.getInstance().getConnectionInfo();
-                        conMsg = MySQLAdapter.getInstance().getQueryMessage();
-                    }
-                    
-                    queryCode.setEnabled(connected);
-                    queryResultTable.setEnabled(connected);
-                    metaTree.setEnabled(connected);
-                    
-                    if (!taActiveDB.getText().equalsIgnoreCase("DB: "+ activeDB)) {
-                        taActiveDB.setText("DB: "+ activeDB);
-                        taActiveDB.setCaretPosition(0);
-                        TreePath dbPath = null;
-                        TreePath tp = metaTree.getNextMatch(activeDB, 0, Position.Bias.Forward);
-                        while (tp != null) {
-                            if (tp.getLastPathComponent().toString().equalsIgnoreCase(activeDB)) {
-                                dbPath = tp;
-                                tp = null;
-                            } else {
-                                tp = metaTree.getNextMatch(activeDB, metaTree.getRowForPath(tp) +1, Position.Bias.Forward);
-                            }
-                        }
-                        if (dbPath != null) {
-                            metaCellRenderer.setHighLightName(activeDB);
-                            for (int i = metaTree.getRowCount() -1; i >= 0; i--) metaTree.collapseRow(i);
-                            metaTree.setSelectionPath(dbPath);
-                            metaTree.expandPath(dbPath);
-                            metaTree.scrollPathToVisible(dbPath);
-                        }
-                    }
+            String activeDB = "No DB selected";
+            String conInfo = "Not connected";
+            String conMsg = "No message";
+            boolean connected = MySQLAdapter.getInstance().isConnected();
 
-                    taMessage.setText(conMsg);
-                    taMessage.setCaretPosition(0);
-                    setTitle("QueryTool ["+ conInfo +"]");
+            if (connected) {
+                activeDB = MySQLAdapter.getInstance().getActiveDatabase();
+                conInfo = MySQLAdapter.getInstance().getConnectionInfo();
+                conMsg = MySQLAdapter.getInstance().getQueryMessage();
+            }
+
+            queryCode.setEnabled(connected);
+            queryResultTable.setEnabled(connected);
+            metaTree.setEnabled(connected);
+
+            if (!taActiveDB.getText().equalsIgnoreCase("DB: "+ activeDB)) {
+                taActiveDB.setText("DB: "+ activeDB);
+                taActiveDB.setCaretPosition(0);
+                if (metaTree.getRowCount() > 0) {
+                    TreePath dbPath = null;
+                    TreePath tp = metaTree.getNextMatch(activeDB, 0, Position.Bias.Forward);
+                    while (tp != null) {
+                        if (tp.getLastPathComponent().toString().equalsIgnoreCase(activeDB)) {
+                            dbPath = tp;
+                            tp = null;
+                        } else {
+                            tp = metaTree.getNextMatch(activeDB, metaTree.getRowForPath(tp) +1, Position.Bias.Forward);
+                        }
+                    }
+                    if (dbPath != null) {
+                        metaCellRenderer.setHighLightName(activeDB);
+                        for (int i = metaTree.getRowCount() -1; i >= 0; i--) metaTree.collapseRow(i);
+                        metaTree.setSelectionPath(dbPath);
+                        metaTree.expandPath(dbPath);
+                        metaTree.scrollPathToVisible(dbPath);
+                        metaTreeModel.nodeChanged(metaTreeModel.findDB(activeDB));
+                        metaTree.treeDidChange();
+                    }
                 }
-            });
+            }
+
+            taMessage.setText(conMsg);
+            taMessage.setCaretPosition(0);
+            setTitle("QueryTool ["+ conInfo +"]");
         }
+    }
+    
+    private void hideTreeRoot() {
+        metaTree.setRootVisible(true);
+        metaTree.expandRow(0);
+        metaTree.setRootVisible(false);
     }
     
     private void loadDBMeta() {
         metaTreeModel.loadMeta(MySQLAdapter.getInstance().getMetaData());
         metaTree.setModel(metaTreeModel);
-        metaTree.setRootVisible(true);
-        metaTree.expandRow(0);
-        metaTree.setRootVisible(false);
+        hideTreeRoot();
     }
 
     private final AbstractAction openConnAction = new AbstractAction() {
@@ -204,7 +207,14 @@ public class MFrame extends javax.swing.JFrame {
 
     private final AbstractAction selMetaAction = new AbstractAction() {
         @Override
-        public void actionPerformed(ActionEvent e) { if (metaTree.isFocusable()) { metaTree.requestFocus(); }; }
+        public void actionPerformed(ActionEvent e) {
+            if (metaTree.isFocusable()) {
+                metaTree.requestFocus();
+                if (metaTree.getSelectionCount() == 0 && metaTree.getRowCount() > 0) {
+                    metaTree.setSelectionRow(0);
+                }
+            }
+        }
     };
 
     private final AbstractAction execQueryAction = new AbstractAction() {
@@ -424,10 +434,9 @@ public class MFrame extends javax.swing.JFrame {
     private void metaTreeKeyPressed(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_metaTreeKeyPressed
         if (evt.getKeyCode() == KeyEvent.VK_ENTER) {
             TreePath tp = metaTree.getSelectionPath();
-            if (tp.getPath().length == 2) {
+            if (tp != null && tp.getPath().length == 2) {
                 String name = tp.getLastPathComponent().toString();
                 MySQLAdapter.getInstance().switchDB(name);
-                metaTree.repaint();
             }
         }
     }//GEN-LAST:event_metaTreeKeyPressed

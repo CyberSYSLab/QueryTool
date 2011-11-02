@@ -25,11 +25,9 @@ import java.awt.Font;
 import javax.swing.JTree;
 import javax.swing.tree.DefaultMutableTreeNode;
 import javax.swing.tree.DefaultTreeCellRenderer;
-import javax.swing.tree.TreeCellRenderer;
 
-public class MetaTreeCellRenderer implements TreeCellRenderer {
-    DefaultTreeCellRenderer renderer = new DefaultTreeCellRenderer();
-    
+public class MetaTreeCellRenderer extends DefaultTreeCellRenderer {
+
     private String highLightName = "";
     
     public void setHighLightName(String highLightName) {
@@ -38,21 +36,20 @@ public class MetaTreeCellRenderer implements TreeCellRenderer {
 
     @Override
     public Component getTreeCellRendererComponent(JTree tree, Object value, boolean selected, boolean expanded, boolean leaf, int row, boolean hasFocus) {
-        renderer.getTreeCellRendererComponent(tree, value, selected, expanded, leaf, row, hasFocus);
+        super.getTreeCellRendererComponent(tree, value, selected, expanded, leaf, row, hasFocus);
 
         if (value != null) {
             if (value instanceof DefaultMutableTreeNode) {
                 if (value.toString().equalsIgnoreCase(highLightName)) {
-                    renderer.setFont(renderer.getFont().deriveFont(Font.BOLD));
-                    renderer.setForeground(Color.blue);
+                    setFont(getFont().deriveFont(Font.BOLD));
+                    setForeground(Color.decode("#3333DD"));
                 } else {
-                    renderer.setForeground(Color.black);
-                    renderer.setFont(renderer.getFont().deriveFont(Font.PLAIN));
+                    setForeground(Color.black);
+                    setFont(getFont().deriveFont(Font.PLAIN));
                 }
-                renderer.revalidate();
             }
         }
-        return renderer;
+        return this;
     }
     
 }

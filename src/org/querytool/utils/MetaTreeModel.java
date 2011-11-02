@@ -54,7 +54,15 @@ public class MetaTreeModel extends DefaultTreeModel {
         }
     }
     
+    public TreeNode findDB(String name) {
+        for (int i = 0; i < root.getChildCount() -1; i++) {
+            if (root.getChildAt(i).toString().equalsIgnoreCase(name)) return root.getChildAt(i);
+        }
+        
+        return null;
+    }
+    
     @Override
-    public Object getRoot() { return rootNode; }
+    public TreeNode getRoot() { return rootNode; }
 
 }
