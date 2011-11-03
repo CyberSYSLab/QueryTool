@@ -35,7 +35,7 @@ public class SQLDocumentListener implements DocumentListener {
     private StyledDocument doc;
     private static final String COMMIT_ACTION = "commit";
     private static enum Mode { INSERT, COMPLETION };
-    private final List<String> words = new ArrayList<String>();
+    private final List<String> keyWords = new ArrayList<String>();
     private Mode mode = Mode.INSERT;
     
     public void setTextArea(JTextPane textArea, StyledDocument doc) {
@@ -49,8 +49,9 @@ public class SQLDocumentListener implements DocumentListener {
     }
     
     public void loadKeyWords(List<String> keyWords) {
-        for (String word : keyWords) words.add(word.toLowerCase());
-        Collections.sort(words);
+        this.keyWords.clear();
+        for (String word : keyWords) this.keyWords.add(word.toLowerCase());
+        Collections.sort(this.keyWords);
     }
     
     private class CommitAction extends AbstractAction {
@@ -63,7 +64,7 @@ public class SQLDocumentListener implements DocumentListener {
                     textArea.setCaretPosition(pos + 1);
                     mode = Mode.INSERT;
                 } catch (BadLocationException ex) { System.err.println(ex.getMessage()); }
-            } else { textArea.replaceSelection("\n"); }
+            } else { textArea.replaceSelection("\t"); }
         }
     }
 
@@ -106,9 +107,9 @@ public class SQLDocumentListener implements DocumentListener {
         if (pos - w < 2) { return; }
         
         String prefix = content.substring(w + 1).toLowerCase();
-        int n = Collections.binarySearch(words, prefix);
-        if (n < 0 && -n <= words.size()) {
-            String match = words.get(-n - 1);
+        int n = Collections.binarySearch(keyWords, prefix);
+        if (n < 0 && -n <= keyWords.size()) {
+            String match = keyWords.get(-n - 1);
             if (match.startsWith(prefix)) {
                 String completion = match.substring(pos - w);
                 SwingUtilities.invokeLater(new CompletionTask(completion, pos + 1));

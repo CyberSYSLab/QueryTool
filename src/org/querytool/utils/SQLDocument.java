@@ -31,9 +31,11 @@ public class SQLDocument extends DefaultStyledDocument {
     private boolean multiLineComment;
     private MutableAttributeSet normal;
     private MutableAttributeSet keyword;
+    private MutableAttributeSet metaword;
     private MutableAttributeSet comment;
     private MutableAttributeSet quote;
     private HashMap<String, Object> keyWords = new HashMap<String, Object>();
+    private HashMap<String, Object> metaWords = new HashMap<String, Object>();
     
     private String lastError = "";
 
@@ -48,20 +50,29 @@ public class SQLDocument extends DefaultStyledDocument {
         StyleConstants.setForeground(comment, Color.GRAY);
         keyword = new SimpleAttributeSet();
         StyleConstants.setForeground(keyword, Color.BLUE);
+        metaword = new SimpleAttributeSet();
+        StyleConstants.setForeground(metaword, Color.decode("#999966"));
         quote = new SimpleAttributeSet();
         StyleConstants.setForeground(quote, Color.RED);
     }
     
     public void loadKeyWords(List<String> keyWords) {
-        for (String word : keyWords) this.keyWords.put(word, new Object());
+        this.keyWords.clear();
+        for (String word : keyWords) { this.keyWords.put(word.toUpperCase(), new Object()); }
     }
 
+    public void loadMetaWords(List<String> metaWords) {
+        this.metaWords.clear();
+        for (String word : metaWords) { this.metaWords.put(word.toUpperCase(), new Object()); }
+    }
+    
     /**
      * Override to apply syntax highlighting after the document has been updated
      */
     @Override
     public void insertString(int offset, String str, AttributeSet a) throws BadLocationException {
         if (str.equals("{")) str = addMatchingBrace(offset);
+        str = str.replaceAll("\t", "    ");
         super.insertString(offset, str, a);
         processChangedLines(offset, str.length());
     }
@@ -245,6 +256,7 @@ public class SQLDocument extends DefaultStyledDocument {
         }
         String token = content.substring(startOffset, endOfToken);
         if (isKeyword(token)) setCharacterAttributes(startOffset, endOfToken - startOffset, keyword, false);
+        if (isMetaword(token)) setCharacterAttributes(startOffset, endOfToken - startOffset, metaword, false);
         return endOfToken + 1;
     }
 
@@ -338,6 +350,14 @@ public class SQLDocument extends DefaultStyledDocument {
         return o == null ? false : true;
     }
 
+    /**
+     * Override for other languages
+     */
+    protected boolean isMetaword(String token) {
+        Object o = metaWords.get(token.toUpperCase());
+        return o == null ? false : true;
+    }
+    
     /**
      * Override for other languages
      */

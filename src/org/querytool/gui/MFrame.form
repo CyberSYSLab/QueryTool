@@ -23,18 +23,18 @@
   <Layout>
     <DimensionLayout dim="0">
       <Group type="103" groupAlignment="1" attributes="0">
-          <Group type="102" alignment="0" attributes="0">
+          <Group type="102" attributes="0">
               <Group type="103" groupAlignment="1" max="-2" attributes="0">
                   <Component id="spActiveDB" pref="0" max="32767" attributes="0"/>
                   <Component id="spMetaTree" pref="183" max="32767" attributes="0"/>
               </Group>
               <EmptySpace max="-2" attributes="0"/>
               <Group type="103" groupAlignment="0" attributes="0">
-                  <Component id="spResultTable" pref="628" max="32767" attributes="0"/>
+                  <Component id="spResultTable" pref="631" max="32767" attributes="0"/>
                   <Component id="spMessage" max="32767" attributes="0"/>
               </Group>
           </Group>
-          <Component id="spQueryCode" alignment="0" max="32767" attributes="0"/>
+          <Component id="spQueryCode" max="32767" attributes="0"/>
       </Group>
     </DimensionLayout>
     <DimensionLayout dim="1">
