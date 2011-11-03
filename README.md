@@ -2,7 +2,7 @@
 
 Application interface must be simple and all functions accessable through hot keys.
 
-Features:
+##### Features:
 * Keyboard centric interface
 * Simplified user interface
 * Simple code completion and highlighting
