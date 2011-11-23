@@ -21,7 +21,6 @@ package org.querytool.utils;
 
 import java.sql.*;
 import java.util.ArrayList;
-import java.util.List;
 import java.util.TreeMap;
 
 public class MySQLAdapter {
@@ -184,8 +183,8 @@ public class MySQLAdapter {
         }
     }
 
-    public List<String> collectWordsForDB(String dbName) {
-        List<String> words = new ArrayList<String>();
+    public ArrayList<String> collectWordsForDB(String dbName) {
+        ArrayList<String> words = new ArrayList<String>();
         try {
             ResultSet rs = connection.getMetaData().getTables(currentDatabase, null, null, null);
             while (rs.next()) {

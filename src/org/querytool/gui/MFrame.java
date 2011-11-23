@@ -25,7 +25,10 @@ import java.awt.Toolkit;
 import java.awt.event.ActionEvent;
 import java.awt.event.KeyEvent;
 import java.net.URL;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.Timer;
+import java.util.TimerTask;
 import javax.swing.AbstractAction;
 import javax.swing.BorderFactory;
 import javax.swing.KeyStroke;
@@ -62,7 +65,6 @@ public class MFrame extends javax.swing.JFrame {
     private MetaTreeCellRenderer metaCellRenderer = new MetaTreeCellRenderer();
     private SQLDocumentListener sqlDocumentListener = new SQLDocumentListener();
     private SQLDocument sqlDocument = new SQLDocument();
-    private List<String> keyWords = new ArrayList<String>();
 
     public MFrame() {
         initComponents();
@@ -99,31 +101,9 @@ public class MFrame extends javax.swing.JFrame {
         hotkeyManager.getActionMap().put(SHOWHELP_KEY, showHelpAction);
 
         hideTreeRoot();
-        keyWords.add("USE");
-        keyWords.add("SELECT");
-        keyWords.add("FROM");
-        keyWords.add("WHERE");
-        keyWords.add("AND");
-        keyWords.add("OR");
-        keyWords.add("AS");
-        keyWords.add("IN");
-        keyWords.add("LIKE");
-        keyWords.add("BETWEEN");
-        keyWords.add("ORDER");
-        keyWords.add("GROUP");
-        keyWords.add("BY");
-        keyWords.add("JOIN");
-        keyWords.add("UNION");
-        keyWords.add("INSERT");
-        keyWords.add("UPDATE");
-        keyWords.add("INTO");
-        keyWords.add("SET");
-        keyWords.add("DROP");
-        keyWords.add("EXISTS");
-        keyWords.add("LIMIT");
-        keyWords.add("TABLE");
-        sqlDocument.loadKeyWords(keyWords);
-        sqlDocumentListener.loadKeyWords(keyWords);
+        
+        sqlDocument.loadKeyWords(KeyWords.getKeyWords());
+        sqlDocumentListener.loadKeyWords(KeyWords.getKeyWords());
         
         connectionTimerTask = new CheckConnectionTask();
         appTimer.schedule(connectionTimerTask, new Date(), 1000);
@@ -167,9 +147,9 @@ public class MFrame extends javax.swing.JFrame {
                             if (dbPath != null) {
                                 metaCellRenderer.setHighLightName(activeDB);
                                 
-                                List<String> words = MySQLAdapter.getInstance().collectWordsForDB("");
+                                ArrayList<String> words = MySQLAdapter.getInstance().collectWordsForDB("");
                                 sqlDocument.loadMetaWords(words);
-                                words.addAll(keyWords);
+                                words.addAll(KeyWords.getKeyWords());
                                 sqlDocumentListener.loadKeyWords(words);
                                 
                                 for (int i = metaTree.getRowCount() -1; i >= 0; i--) metaTree.collapseRow(i);
