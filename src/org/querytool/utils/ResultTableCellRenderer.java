@@ -29,14 +29,29 @@ public class ResultTableCellRenderer extends DefaultTableCellRenderer {
     @Override
     public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected, boolean hasFocus, int rowIndex, int vColIndex) {
         Component c = super.getTableCellRendererComponent(table, value, isSelected, hasFocus, rowIndex, vColIndex);
+        
+        if (isSelected) {
+            setBackground(Color.decode("#dddddd"));
+        } else {
+            setBackground(Color.decode("#ffffff"));
+        }
+
         if (value != null) {
             setForeground(Color.black);
             if (value instanceof Number) {
                 setHorizontalAlignment(RIGHT);
-                setForeground(Color.decode("#339933"));
+                if (isSelected) {
+                    setBackground(Color.decode("#ccffcc"));
+                } else {
+                    setBackground(Color.decode("#f1fff1"));
+                }
             }
             if (value instanceof Date) {
-                setForeground(Color.decode("#888855"));
+                if (isSelected) {
+                    setBackground(Color.decode("#ffffcc"));
+                } else {
+                    setBackground(Color.decode("#fffff1"));
+                }
             }
         } else {
             setForeground(Color.lightGray);

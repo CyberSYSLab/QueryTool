@@ -31,7 +31,6 @@ import java.util.Timer;
 import java.util.TimerTask;
 import javax.swing.AbstractAction;
 import javax.swing.BorderFactory;
-import javax.swing.KeyStroke;
 import javax.swing.SwingUtilities;
 import javax.swing.text.Position;
 import javax.swing.tree.TreePath;
@@ -41,21 +40,6 @@ public class MFrame extends javax.swing.JFrame {
 
     private Timer appTimer = new Timer();
     private TimerTask connectionTimerTask = null;
-    
-    private final String OPENCONN_KEY = "OPENCONN";
-    private final KeyStroke openConnHotkey = KeyStroke.getKeyStroke(KeyEvent.VK_O, KeyEvent.CTRL_MASK, false);
-    private final String RECONN_KEY = "RECONN";
-    private final KeyStroke reConnHotkey = KeyStroke.getKeyStroke(KeyEvent.VK_R, KeyEvent.CTRL_MASK, false);
-    private final String SELQUERY_KEY = "SELQUERY";
-    private final KeyStroke selQueryHotkey = KeyStroke.getKeyStroke(KeyEvent.VK_1, KeyEvent.CTRL_MASK, false);
-    private final String SELRESULT_KEY = "SELRESULT";
-    private final KeyStroke selResultHotkey = KeyStroke.getKeyStroke(KeyEvent.VK_2, KeyEvent.CTRL_MASK, false);
-    private final String SELMETA_KEY = "SELMETA";
-    private final KeyStroke selMetaHotkey = KeyStroke.getKeyStroke(KeyEvent.VK_3, KeyEvent.CTRL_MASK, false);
-    private final String EXECQUERY_KEY = "EXECQUERY";
-    private final KeyStroke execQueryHotkey = KeyStroke.getKeyStroke(KeyEvent.VK_ENTER, KeyEvent.CTRL_MASK, false);
-    private final String SHOWHELP_KEY = "SHOWHELP";
-    private final KeyStroke showHelpHotkey = KeyStroke.getKeyStroke(KeyEvent.VK_F1, 0, false);
     
     private final Color focusColor = Color.decode("#AAAAEE");
     private final Color noFocusColor = Color.LIGHT_GRAY;
@@ -81,24 +65,13 @@ public class MFrame extends javax.swing.JFrame {
         setIconImage(img);
         
         AppHotKey hotkeyManager = AppHotKey.getInstance();
-        hotkeyManager.getInputMap().put(openConnHotkey, OPENCONN_KEY);
-        hotkeyManager.getActionMap().put(OPENCONN_KEY, openConnAction);
-
-        hotkeyManager.getInputMap().put(reConnHotkey, RECONN_KEY);
-        hotkeyManager.getActionMap().put(RECONN_KEY, reConnAction);
-
-        hotkeyManager.getInputMap().put(selQueryHotkey, SELQUERY_KEY);
-        hotkeyManager.getActionMap().put(SELQUERY_KEY, selQueryAction);
-        hotkeyManager.getInputMap().put(selResultHotkey, SELRESULT_KEY);
-        hotkeyManager.getActionMap().put(SELRESULT_KEY, selResultAction);
-        hotkeyManager.getInputMap().put(selMetaHotkey, SELMETA_KEY);
-        hotkeyManager.getActionMap().put(SELMETA_KEY, selMetaAction);
-
-        hotkeyManager.getInputMap().put(execQueryHotkey, EXECQUERY_KEY);
-        hotkeyManager.getActionMap().put(EXECQUERY_KEY, execQueryAction);
-
-        hotkeyManager.getInputMap().put(showHelpHotkey, SHOWHELP_KEY);
-        hotkeyManager.getActionMap().put(SHOWHELP_KEY, showHelpAction);
+        hotkeyManager.addKey(KeyEvent.VK_O, KeyEvent.CTRL_MASK, openConnAction);
+        hotkeyManager.addKey(KeyEvent.VK_R, KeyEvent.CTRL_MASK, reConnAction);
+        hotkeyManager.addKey(KeyEvent.VK_3, KeyEvent.ALT_MASK, selQueryAction);
+        hotkeyManager.addKey(KeyEvent.VK_2, KeyEvent.ALT_MASK, selResultAction);
+        hotkeyManager.addKey(KeyEvent.VK_1, KeyEvent.ALT_MASK, selMetaAction);
+        hotkeyManager.addKey(KeyEvent.VK_ENTER, KeyEvent.CTRL_MASK, execQueryAction);
+        hotkeyManager.addKey(KeyEvent.VK_F1, 0, showHelpAction);
 
         hideTreeRoot();
         

@@ -66,7 +66,7 @@ public class HelpDialog extends javax.swing.JDialog {
         taHelpText.setColumns(20);
         taHelpText.setEditable(false);
         taHelpText.setRows(5);
-        taHelpText.setText("                                 QueryTool — DB (MySQL) SQL tool.\n\nHotKeys:\n    * Ctrl-O — open connection\n    * Ctrl-[1/2/3] — switch between [query editor / result table / db metadata tree]\n    * Ctrl-Enter — execute query\n    * Ctrl-R — refresh db metadata or reconnect if disconnected\n");
+        taHelpText.setText("                                 QueryTool — DB (MySQL) SQL tool.\n\nHotKeys:\n    * Alt-[1/2/3] — switch between [db metadata tree / result table / query editor]\n\n    * Ctrl-O — open connection\n    * Ctrl-Enter — execute query\n    * Ctrl-R — refresh db metadata or reconnect if disconnected\n");
         spHelpText.setViewportView(taHelpText);
 
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());

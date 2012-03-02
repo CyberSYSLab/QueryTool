@@ -24,10 +24,7 @@ import java.awt.EventQueue;
 import java.awt.Toolkit;
 import java.awt.event.ActionEvent;
 import java.awt.event.KeyEvent;
-import javax.swing.Action;
-import javax.swing.ActionMap;
-import javax.swing.InputMap;
-import javax.swing.KeyStroke;
+import javax.swing.*;
 
 public class AppHotKey extends EventQueue {
 
@@ -59,5 +56,14 @@ public class AppHotKey extends EventQueue {
             }
         }
         super.dispatchEvent(event);
+    }
+    
+    public void addKey(int keyCode, int modifiers, AbstractAction action) {
+        addKey(KeyStroke.getKeyStroke(keyCode, modifiers, false), action);
+    }
+    
+    public void addKey(KeyStroke key, AbstractAction action) {
+        getInputMap().put(key, key.toString());
+        getActionMap().put(key.toString(), action);
     }
 }

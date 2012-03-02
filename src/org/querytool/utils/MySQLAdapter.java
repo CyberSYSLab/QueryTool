@@ -140,6 +140,13 @@ public class MySQLAdapter {
     public ResultSet execQuery(String query) {
         queryMessage = "No message";
         ResultSet rs = exec(query);
+        if (rs != null) {
+            try {
+                rs.last();
+                queryMessage = "Rows: "+ Integer.toString(rs.getRow());
+                rs.beforeFirst();
+            } catch(SQLException exc) { queryMessage = exc.getMessage(); }
+        }
         getCurrentDatabase();
         
         return rs;

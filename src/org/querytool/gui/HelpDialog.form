@@ -65,7 +65,7 @@
             <Property name="columns" type="int" value="20"/>
             <Property name="editable" type="boolean" value="false"/>
             <Property name="rows" type="int" value="5"/>
-            <Property name="text" type="java.lang.String" value="                                 QueryTool &#x2014; DB (MySQL) SQL tool.&#xa;&#xa;HotKeys:&#xa;    * Ctrl-O &#x2014; open connection&#xa;    * Ctrl-[1/2/3] &#x2014; switch between [query editor / result table / db metadata tree]&#xa;    * Ctrl-Enter &#x2014; execute query&#xa;    * Ctrl-R &#x2014; refresh db metadata or reconnect if disconnected&#xa;"/>
+            <Property name="text" type="java.lang.String" value="                                 QueryTool &#x2014; DB (MySQL) SQL tool.&#xa;&#xa;HotKeys:&#xa;    * Alt-[1/2/3] &#x2014; switch between [db metadata tree / result table / query editor]&#xa;&#xa;    * Ctrl-O &#x2014; open connection&#xa;    * Ctrl-Enter &#x2014; execute query&#xa;    * Ctrl-R &#x2014; refresh db metadata or reconnect if disconnected&#xa;"/>
           </Properties>
         </Component>
       </SubComponents>
